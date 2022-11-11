@@ -7,7 +7,7 @@ from requests_aws4auth import AWS4Auth
 
 def lambda_handler(event, context):
     print("EVENT ---- {}".format(json.dumps(event)))
-    #TESTING PIPELINE
+    #TESTING PIPELINE 2
     headers = {"Content-Type": "application/json"}
     
     s3 = boto3.client('s3')
