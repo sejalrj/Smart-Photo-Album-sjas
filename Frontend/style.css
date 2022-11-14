@@ -1,0 +1,141 @@
+ul {
+    list-style: none;
+    padding: 0;
+  }
+  body {
+    background: url('BG.jpg');
+    background-size: cover;
+  }
+  p {
+    color: #444;
+  }
+  
+  input[type='text'] {
+    width: 500px;
+    height: 60px;
+  }
+  .upload {
+    width: 450px;
+    font-size: 24px;
+    margin-left: 0px;
+  }
+  button[type='line1'] {
+    background-color: #063970;
+    width: 75px;
+    height: 60px;
+  }
+  button[type='line1']:focus {
+    outline: 0;
+  }
+  button[type='line2'] {
+    background-color: #063970;
+    width: 150px;
+    height: 60px;
+  }
+  button[type='line2']:focus {
+    outline: 0;
+  }
+  h2 {
+    font-family: Constantia;
+  }
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-left: 40px;
+    text-align: center;
+    opacity: 0.9;
+  }
+  .output-group {
+  width: 700px;
+  }
+
+  h3 {
+    font-family: Constantia;
+  }
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-left: 0px;
+    text-align: center;
+    opacity: 0.9;
+  }
+  
+  .container h1 {
+    margin-bottom: 20px;
+  }
+  
+  .page-description {
+    font-size: 1.1rem;
+    margin: 0 auto;
+  }
+  
+  .tz-link {
+    font-size: 1em;
+    color: #1da7da;
+    text-decoration: none;
+  }
+  
+  .no-browser-support {
+    display: none;
+    font-size: 1.2rem;
+    color: #e64427;
+    margin-top: 35px;
+  }
+  
+  .app {
+    margin-top: 100px;
+  }
+  .input-group {
+    width: 700px;
+  }
+  
+  #recording-instructions {
+    margin: 15px auto 60px;
+  }
+  
+  #notes {
+    padding-top: 20px;
+  }
+  
+  .note .header {
+    font-size: 0.9em;
+    color: #888;
+    margin-bottom: 10px;
+  }
+  
+  .note .delete-note,
+  .note .listen-note {
+    text-decoration: none;
+    margin-left: 15px;
+  }
+  
+  .note .content {
+    margin-bottom: 40px;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 50px 25px;
+    }
+  
+    button {
+      margin-bottom: 10px;
+    }
+  }
+  
+  .banner-section img {
+    margin: 5px;
+    height: 200px;
+    width: 275px;
+  }
+  
+  .banner-section {
+    height: 500px;
+    overflow: auto;
+  }
+  
+  @media (max-width: 1200px) {
+    #bsaHolder {
+      display: none;
+    }
+  }
