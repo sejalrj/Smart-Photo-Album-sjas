@@ -1,0 +1,238 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    LambdaFunction:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: !Sub "index-${OpenSearchServiceDomain}"
+            Handler: "lambda_function.lambda_handler"
+            Architectures: 
+              - "x86_64"
+            Code: 
+                S3Bucket: "prod-04-2014-tasks"
+                S3Key: !Sub "/snapshots/${AWS::AccountId}/index-${OpenSearchServiceDomain}-73b9c67b-be2c-4768-8576-cc97dc63fa06"
+                S3ObjectVersion: "pE3EH4hHm3SKXQHlmVp1d.Iyt.mB78Lf"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/index-${OpenSearchServiceDomain}-role-nh2q51vw"
+            Runtime: "python3.9"
+            Timeout: 3
+            TracingConfig: 
+                Mode: "PassThrough"
+            Layers: 
+              - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:python_modules:1"
+            EphemeralStorage: 
+                Size: 512
+
+    LambdaFunction2:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: !Sub "search-${OpenSearchServiceDomain}"
+            Handler: "lambda_function.lambda_handler"
+            Architectures: 
+              - "x86_64"
+            Code: 
+                S3Bucket: "prod-04-2014-tasks"
+                S3Key: !Sub "/snapshots/${AWS::AccountId}/search-${OpenSearchServiceDomain}-9144ea83-0368-444f-9b4f-821d36d35b64"
+                S3ObjectVersion: "6iYtNtFYgxZbD7YQZg.2dKHtTtRU4eZy"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/search-${OpenSearchServiceDomain}-role-bg1vpnqy"
+            Runtime: "python3.9"
+            Timeout: 3
+            TracingConfig: 
+                Mode: "PassThrough"
+            Layers: 
+              - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:python_modules:1"
+            EphemeralStorage: 
+                Size: 512
+
+    S3Bucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "frontend-bucket-as15098"
+            CorsConfiguration: 
+                CorsRules: 
+                  - 
+                    AllowedHeaders: 
+                      - "*"
+                    AllowedMethods: 
+                      - "PUT"
+                      - "POST"
+                      - "DELETE"
+                    AllowedOrigins: 
+                      - "*"
+            WebsiteConfiguration: 
+                IndexDocument: "index.html"
+
+    S3Bucket2:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "ajs-album"
+            CorsConfiguration: 
+                CorsRules: 
+                  - 
+                    AllowedHeaders: 
+                      - "*"
+                    AllowedMethods: 
+                      - "PUT"
+                      - "POST"
+                      - "DELETE"
+                    AllowedOrigins: 
+                      - "*"
+            NotificationConfiguration: 
+                LambdaConfigurations: 
+                  - 
+                    Event: "s3:ObjectCreated:Put"
+                    Filter: 
+                        S3Key: 
+                            Rules: 
+                              - 
+                                Name: "Prefix"
+                                Value: ""
+                              - 
+                                Name: "Suffix"
+                                Value: ""
+                    Function: !GetAtt LambdaFunction.Arn
+
+    ApiGatewayRestApi:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Name: "Smart Photo Search"
+            Description: "Smart Photo Search application, built during the Cloud Computing and Big Data course at New York University."
+            ApiKeySourceType: "HEADER"
+            BinaryMediaTypes: 
+              - "*/*"
+            EndpointConfiguration: 
+                Types: 
+                  - "REGIONAL"
+
+    CodeBuildProject:
+        Type: "AWS::CodeBuild::Project"
+        Properties:
+            Name: "github-to-lambda"
+            Source: 
+                GitCloneDepth: 1
+                GitSubmodulesConfig: 
+                    FetchSubmodules: false
+                InsecureSsl: false
+                Location: "https://github.com/sejalrj/Smart-Photo-Album-sjas.git"
+                ReportBuildStatus: false
+                Type: "GITHUB"
+            Artifacts: 
+                Type: "NO_ARTIFACTS"
+            Cache: 
+                Type: "NO_CACHE"
+            Environment: 
+                ComputeType: "BUILD_GENERAL1_SMALL"
+                Image: "aws/codebuild/standard:5.0"
+                ImagePullCredentialsType: "CODEBUILD"
+                PrivilegedMode: false
+                Type: "LINUX_CONTAINER"
+            ServiceRole: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/codebuild-github-to-lambda-service-role"
+            TimeoutInMinutes: 60
+            QueuedTimeoutInMinutes: 480
+            EncryptionKey: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/s3"
+            BadgeEnabled: false
+            LogsConfig: 
+                CloudWatchLogs: 
+                    Status: "ENABLED"
+                S3Logs: 
+                    Status: "DISABLED"
+                    EncryptionDisabled: false
+            Visibility: "PRIVATE"
+
+    CodePipelinePipeline:
+        Type: "AWS::CodePipeline::Pipeline"
+        Properties:
+            Name: "github-to-s3"
+            RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSCodePipelineServiceRole-${AWS::Region}-github-to-s3"
+            ArtifactStore: 
+                Location: !Sub "codepipeline-${AWS::Region}-761201075058"
+                Type: "S3"
+            Stages: 
+              - 
+                Name: "Source"
+                Actions: 
+                  - 
+                    Name: "Source"
+                    ActionTypeId: 
+                        Category: "Source"
+                        Owner: "AWS"
+                        Provider: "CodeStarSourceConnection"
+                        Version: "1"
+                    Configuration: 
+                        BranchName: "main"
+                        ConnectionArn: !Sub "arn:aws:codestar-connections:${AWS::Region}:${AWS::AccountId}:connection/2e6ef8f5-19e3-41e1-8bdd-534be82c064a"
+                        FullRepositoryId: "sejalrj/Smart-Photo-Album-sjas"
+                        OutputArtifactFormat: "CODE_ZIP"
+                    OutputArtifacts: 
+                      - 
+                        Name: "SourceArtifact"
+                    Region: !Ref AWS::Region
+                    Namespace: "SourceVariables"
+                    RunOrder: 1
+              - 
+                Name: "Deploy"
+                Actions: 
+                  - 
+                    Name: "Deploy"
+                    ActionTypeId: 
+                        Category: "Deploy"
+                        Owner: "AWS"
+                        Provider: "S3"
+                        Version: "1"
+                    Configuration: 
+                        BucketName: !Ref S3Bucket
+                        Extract: "true"
+                    InputArtifacts: 
+                      - 
+                        Name: "SourceArtifact"
+                    Region: !Ref AWS::Region
+                    Namespace: "DeployVariables"
+                    RunOrder: 1
+
+    OpenSearchServiceDomain:
+        Type: "AWS::OpenSearchService::Domain"
+        Properties:
+            DomainName: "photos"
+            EngineVersion: "7.10"
+            ClusterConfig: 
+                ColdStorageOptions: 
+                    Enabled: false
+                DedicatedMasterEnabled: false
+                InstanceCount: 3
+                InstanceType: "r6g.large.elasticsearch"
+                ZoneAwarenessEnabled: false
+                WarmEnabled: false
+            AccessPolicies: !Sub "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Action\":\"es:*\",\"Resource\":\"arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/photos/*\"}]}"
+            SnapshotOptions: {}
+            snapshot_options: {}
+            EncryptionAtRestOptions: 
+                Enabled: true
+                KmsKeyId: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/cb016e2b-2cc3-4539-8d95-9b77db17bbb2"
+            NodeToNodeEncryptionOptions: 
+                Enabled: true
+            AdvancedOptions: 
+                "indices.fielddata.cache.size": "20"
+                "indices.query.bool.max_clause_count": "1024"
+                override_main_response_version: "false"
+                "rest.action.multi.allow_explicit_index": "true"
+            EBSOptions: 
+                EBSEnabled: true
+                VolumeType: "gp3"
+                VolumeSize: 10
+                Iops: 3000
+                Throughput: 125
+            CognitoOptions: 
+                Enabled: false
+            DomainEndpointOptions: 
+                EnforceHTTPS: true
+                TLSSecurityPolicy: "Policy-Min-TLS-1-0-2019-07"
+                CustomEndpointEnabled: false
+            AdvancedSecurityOptions: 
+                Enabled: true
+                InternalUserDatabaseEnabled: true
+                AnonymousAuthEnabled: false
