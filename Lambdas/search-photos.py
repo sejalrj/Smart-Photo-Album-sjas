@@ -6,7 +6,7 @@ from requests_aws4auth import AWS4Auth
 
 
 def lambda_handler(event, context):
-    # TODO implement
+    # TODO implement TESTING PIPELINE
     
     print("-----EVENT-----",event)
     query = event['queryStringParameters']['q']
