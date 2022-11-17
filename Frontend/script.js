@@ -16,7 +16,7 @@ var noteContent = '';
       Voice Recognition
 ------------------------------*/
 
-// If false, the recording will stop after a few seconds of silence.
+// If false, the recording will stop after a few seconds of silence. TEST
 // When true, the silence period is longer (about 15 seconds),
 // allowing us to keep recording even when the user pauses.
 recognition.continuous = false;
